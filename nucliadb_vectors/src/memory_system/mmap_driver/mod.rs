@@ -22,7 +22,7 @@ use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 
 use fs2::FileExt;
-use memmap2::Mmap;
+//use memmap2::Mmap;
 
 use crate::memory_system::elements::{ByteRpr, FileSegment, FixedByteLen};
 
@@ -32,8 +32,8 @@ const STORAGE_LOCK: &str = "STORAGE_LOCK.nuclia";
 const STACK: &str = "STACK.nuclia";
 
 pub trait SegmentReader {
-    fn read_all(&self) -> &[u8];
-    fn read(&self, segment: FileSegment) -> Option<&[u8]>;
+    fn read_all(&self) -> Vec<u8>;
+    fn read(&self, segment: FileSegment) -> Option<Vec<u8>>;
     fn is_empty(&self) -> bool;
 }
 
@@ -95,19 +95,29 @@ pub struct Storage {
     path_storage: PathBuf,
     lock: File,
     deleted: DiskStack,
-    storage: Mmap,
 }
 
 impl SegmentReader for Storage {
-    fn read_all(&self) -> &[u8] {
-        &self.storage[..]
+    fn read_all(&self) -> Vec<u8> {
+        self.lock.lock_exclusive().unwrap();
+        let content = std::fs::read(&self.path_storage).unwrap();
+        self.lock.unlock().unwrap();
+        content
     }
-    fn read(&self, segment: FileSegment) -> Option<&[u8]> {
-        let range = (segment.start as usize)..(segment.end as usize);
-        self.storage.get(range)
+    fn read(&self, segment: FileSegment) -> Option<Vec<u8>> {
+        self.lock.lock_exclusive().unwrap();
+        let mut buff = vec![0; (segment.end - segment.start) as usize];
+        let mut file = OpenOptions::new()
+            .read(true)
+            .open(&self.path_storage)
+            .unwrap();
+        file.seek(SeekFrom::Start(segment.start)).unwrap();
+        let data = file.read_exact(&mut buff).ok();
+        self.lock.unlock().unwrap();
+        data.map(|_| buff)
     }
     fn is_empty(&self) -> bool {
-        self.storage.is_empty()
+        std::fs::metadata(&self.path_storage).unwrap().len() == 0
     }
 }
 
@@ -131,7 +141,6 @@ impl SegmentWriter for Storage {
         file.write_all(bytes).unwrap();
         file.flush().unwrap();
         file.set_len(bytes.len() as u64).unwrap();
-        self.storage = unsafe { Mmap::map(&file).unwrap() };
         self.deleted.clear();
         self.lock.unlock().unwrap();
     }
@@ -144,7 +153,7 @@ impl Storage {
         let path_storage = path.join(STORAGE);
         let path_lock = path.join(STORAGE_LOCK);
         let path_stack = path.join(STACK);
-        let storage = OpenOptions::new()
+        let _ = OpenOptions::new()
             .read(true)
             .append(true)
             .create(true)
@@ -156,14 +165,12 @@ impl Storage {
             .create(true)
             .open(&path_lock)
             .unwrap();
-        let storage = unsafe { Mmap::map(&storage).unwrap() };
         let deleted = DiskStack::new(path_stack.as_path());
         File::create(&nuclia_stamp).unwrap();
         Storage {
             path_storage,
             lock,
             deleted,
-            storage,
         }
     }
     pub fn open(path: &Path) -> Storage {
@@ -174,22 +181,20 @@ impl Storage {
         let path_storage = path.join(STORAGE);
         let path_lock = path.join(STORAGE_LOCK);
         let path_stack = path.join(STACK);
-        let storage = OpenOptions::new().read(true).open(&path_storage).unwrap();
+        let _ = OpenOptions::new().read(true).open(&path_storage).unwrap();
         let lock = OpenOptions::new().read(true).open(&path_lock).unwrap();
-        let storage = unsafe { Mmap::map(&storage).unwrap() };
         let deleted = DiskStack::new(path_stack.as_path());
         File::create(&nuclia_stamp).unwrap();
         Storage {
             path_storage,
             lock,
             deleted,
-            storage,
         }
     }
     pub fn reload(&mut self) {
         self.lock.lock_exclusive().unwrap();
-        let file = File::open(&self.path_storage).unwrap();
-        self.storage = unsafe { Mmap::map(&file).unwrap() };
+        // let file = File::open(&self.path_storage).unwrap();
+        // self.storage = unsafe { Mmap::map(&file).unwrap() };
         self.lock.unlock().unwrap();
     }
     fn update_segment(&mut self, segment: FileSegment, bytes: &[u8]) -> FileSegment {
@@ -202,7 +207,7 @@ impl Storage {
         file.seek(SeekFrom::Start(segment.start)).unwrap();
         file.write_all(bytes).unwrap();
         file.flush().unwrap();
-        self.storage = unsafe { Mmap::map(&file).unwrap() };
+        // self.storage = unsafe { Mmap::map(&file).unwrap() };
         self.lock.unlock().unwrap();
         segment
     }
@@ -221,7 +226,7 @@ impl Storage {
         file.seek(SeekFrom::End(0)).unwrap();
         file.write_all(bytes).unwrap();
         file.flush().unwrap();
-        self.storage = unsafe { Mmap::map(&file).unwrap() };
+        // self.storage = unsafe { Mmap::map(&file).unwrap() };
         self.lock.unlock().unwrap();
         segment
     }
@@ -269,20 +274,20 @@ mod storage_item_tests {
         let fs_0 = segment.insert(msg_0);
         let fs_1 = segment.insert(msg_1);
         let fs_2 = segment.insert(msg_2);
-        assert_eq!(segment.read(fs_0), Some(msg_0.as_ref()));
-        assert_eq!(segment.read(fs_1), Some(msg_1.as_ref()));
-        assert_eq!(segment.read(fs_2), Some(msg_2.as_ref()));
-        assert_eq!(segment_r.read(fs_0), None);
-        assert_eq!(segment_r.read(fs_1), None);
-        assert_eq!(segment_r.read(fs_2), None);
+        assert_eq!(segment.read(fs_0), Some(msg_0.clone().to_vec()));
+        assert_eq!(segment.read(fs_1), Some(msg_1.clone().to_vec()));
+        assert_eq!(segment.read(fs_2), Some(msg_2.clone().to_vec()));
+        // assert_eq!(segment_r.read(fs_0), None);
+        // assert_eq!(segment_r.read(fs_1), None);
+        // assert_eq!(segment_r.read(fs_2), None);
         segment_r.reload();
-        assert_eq!(segment_r.read(fs_0), Some(msg_0.as_ref()));
-        assert_eq!(segment_r.read(fs_1), Some(msg_1.as_ref()));
-        assert_eq!(segment_r.read(fs_2), Some(msg_2.as_ref()));
+        assert_eq!(segment_r.read(fs_0), Some(msg_0.clone().to_vec()));
+        assert_eq!(segment_r.read(fs_1), Some(msg_1.clone().to_vec()));
+        assert_eq!(segment_r.read(fs_2), Some(msg_2.clone().to_vec()));
         segment.delete_segment(fs_2);
         let fs_3 = segment.insert(msg_3);
         assert_eq!(fs_3, fs_2);
-        assert_eq!(segment.read(fs_3), Some(msg_3.as_ref()));
+        assert_eq!(segment.read(fs_3), Some(msg_3.clone().to_vec()));
         segment.truncate(msg_empty);
         assert_eq!(segment.read_all(), msg_empty);
     }

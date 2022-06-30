@@ -36,7 +36,10 @@ pub fn semi_mapped_consine_similarity(x: &[f32], y: Node, storage: &Storage) -> 
             start: y_cursor,
             end: y_cursor + f32_len,
         };
-        let y_value = storage.read(y_i).map(f32::from_byte_rpr).unwrap();
+        let y_value = storage
+            .read(y_i)
+            .map(|v| f32::from_byte_rpr(v.as_slice()))
+            .unwrap();
         sum += x_value * y_value;
         dem_x += x_value * x_value;
         dem_y += y_value * y_value;

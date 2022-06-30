@@ -137,7 +137,7 @@ fn create_query() -> Vec<f32> {
         .collect()
 }
 
-//#[test]
+#[test]
 #[allow(unused)]
 fn stress_test() {
     use std::time::{Duration, SystemTime};

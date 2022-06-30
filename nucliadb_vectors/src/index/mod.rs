@@ -128,7 +128,7 @@ impl Index {
         key
     }
     pub fn get_node_vector(&self, node: Node) -> Vector {
-        Vector::from_byte_rpr(self.vector_storage.read(node.vector).unwrap())
+        Vector::from_byte_rpr(&self.vector_storage.read(node.vector).unwrap())
     }
     pub fn reload(&mut self) {
         let txn = self.lmdb_driver.ro_txn();
