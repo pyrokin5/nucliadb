@@ -27,6 +27,11 @@ use nucliadb_vectors::service::VectorWriterService;
 use prost::Message;
 use tempdir::TempDir;
 
+use tikv_jemallocator::Jemalloc;
+
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dir = TempDir::new("payload_dir").unwrap();
