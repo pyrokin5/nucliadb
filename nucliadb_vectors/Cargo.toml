@@ -28,7 +28,7 @@ fs2 = "0.4.3"
 nucliadb_service_interface = { path = "../nucliadb_service_interface" }
 nucliadb_byte_rpr = { path = "../nucliadb_byte_rpr" }
 clap = { version = "3.1.18", features = ["derive"] }
-tikv-jemallocator = { version = "0.5.0", features = ["profiling"] }
+dhat = "0.3.0"
 [dev-dependencies]
 env_logger = "0.9.0"
 
@@ -43,3 +43,9 @@ path = "src/sic/vectors_sic.rs"
 [[bin]]
 name = "analysis"
 path = "src/sic/analysis.rs"
+
+[profile.release]
+debug = 1
+
+[features]
+dhat-heap = [] # if you are doing heap profiling

@@ -27,30 +27,39 @@ use nucliadb_vectors::service::VectorWriterService;
 use prost::Message;
 use tempdir::TempDir;
 
-use tikv_jemallocator::Jemalloc;
-
+#[cfg(feature = "dhat-heap")]
 #[global_allocator]
-static GLOBAL: Jemalloc = Jemalloc;
+static ALLOC: dhat::Alloc = dhat::Alloc;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let dir = TempDir::new("payload_dir").unwrap();
-    let vsc = VectorServiceConfiguration {
-        no_results: None,
-        path: dir.path().to_str().unwrap().to_string(),
-    };
-    let mut writer = VectorWriterService::start(&vsc).await.unwrap();
-    let payload_dir = std::path::Path::new("Path_to_data");
-    assert!(payload_dir.exists());
-    for file_path in std::fs::read_dir(&payload_dir).unwrap() {
-        let file_path = file_path.unwrap().path();
-        println!("processing {file_path:?}");
-        let content = std::fs::read(&file_path).unwrap();
-        let resource = Resource::decode(&mut Cursor::new(content)).unwrap();
-        println!("Adding resource {}", file_path.display());
-        let res = writer.set_resource(&resource);
-        assert!(res.is_ok());
-        println!("Resource added");
-    }
-    Ok(())
+pub fn main() -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(feature = "dhat-heap")]
+    let _profiler = dhat::Profiler::new_heap();
+
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(2)
+        .enable_all()
+        .build()
+        .unwrap();
+
+    rt.block_on(async move {
+        let dir = TempDir::new("payload_dir").unwrap();
+        let vsc = VectorServiceConfiguration {
+            no_results: None,
+            path: dir.path().to_str().unwrap().to_string(),
+        };
+        let mut writer = VectorWriterService::start(&vsc).await.unwrap();
+        let payload_dir = std::path::Path::new("Path_to_data");
+        assert!(payload_dir.exists());
+        for file_path in std::fs::read_dir(&payload_dir).unwrap() {
+            let file_path = file_path.unwrap().path();
+            println!("processing {file_path:?}");
+            let content = std::fs::read(&file_path).unwrap();
+            let resource = Resource::decode(&mut Cursor::new(content)).unwrap();
+            println!("Adding resource {}", file_path.display());
+            let res = writer.set_resource(&resource);
+            assert!(res.is_ok());
+            println!("Resource added");
+        }
+        Ok(())
+    })
 }
