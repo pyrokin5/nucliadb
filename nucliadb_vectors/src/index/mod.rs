@@ -147,6 +147,9 @@ impl Index {
         txn.abort().unwrap();
     }
     pub fn commit(&mut self) {
+        #[cfg(feature = "dhat-ad-hoc")]
+        dhat::ad_hoc_event(1000);
+
         for i in 0..self.layers_len {
             let mut rw_txn = self.lmdb_driver.rw_txn();
             self.lmdb_driver
