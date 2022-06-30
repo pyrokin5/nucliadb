@@ -23,7 +23,7 @@ use std::io::Cursor;
 use nucliadb_protos::*;
 use nucliadb_service_interface::prelude::*;
 use nucliadb_service_interface::vectos_interface::VectorServiceConfiguration;
-use nucliadb_vectors::service::VectorWriterService;
+use nucliadb_vectors::service::{VectorWriterService, VectorReaderService};
 use prost::Message;
 use tempdir::TempDir;
 
@@ -44,11 +44,12 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     rt.block_on(async move {
         let dir = TempDir::new("payload_dir").unwrap();
         let vsc = VectorServiceConfiguration {
-            no_results: None,
+            no_results: Some(10),
             path: dir.path().to_str().unwrap().to_string(),
         };
         let mut writer = VectorWriterService::start(&vsc).await.unwrap();
-        let payload_dir = std::path::Path::new("Path_to_data");
+        let reader = VectorReaderService::start(&vsc).await.unwrap();
+        let payload_dir = std::path::Path::new("/Users/hermegarcia/RustWorkspace/data");
         assert!(payload_dir.exists());
         for file_path in std::fs::read_dir(&payload_dir).unwrap() {
             let file_path = file_path.unwrap().path();
@@ -60,6 +61,8 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
             assert!(res.is_ok());
             println!("Resource added");
         }
+        reader.reload();
+        println!("No vectors: {}", reader.count());
         Ok(())
     })
 }

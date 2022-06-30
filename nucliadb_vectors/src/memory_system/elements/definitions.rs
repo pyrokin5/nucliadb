@@ -147,6 +147,38 @@ impl std::ops::Index<(Node, Node)> for GraphLayer {
 }
 
 impl GraphLayer {
+    #[allow(unused)]
+    pub fn report(&self) {
+        let capacity = self.cnx.capacity();
+        let no_nodes = self.cnx.len();
+        let ununsed = capacity - no_nodes;
+        let size_of_node = std::mem::size_of::<Node>();
+        let size_of_edge = std::mem::size_of::<Edge>();
+        let size_of_connexions = |x: usize, t: &BTreeMap<Node, Edge>| -> usize {
+            x + (size_of_edge + size_of_node) * t.len()
+        };
+        let (total_edge_size, max_edge_size) = self
+            .cnx
+            .values()
+            .map(|tree| size_of_connexions(0, tree))
+            .fold((0, 0), |(total, max), tree| {
+                (total + tree, std::cmp::max(max, tree))
+            });
+        println!(
+            "Nodes size: {}bytes; {}bytes per node",
+            no_nodes * size_of_node,
+            size_of_node
+        );
+        println!(
+            "Edges size: {}bytes; {}bytes max edge tree; edge size: {}",
+            total_edge_size, max_edge_size, size_of_edge
+        );
+
+        println!(
+            "Unused: {}bytes",
+            ununsed * (size_of_node + std::mem::size_of::<BTreeMap<Node, Edge>>())
+        )
+    }
     pub fn new() -> GraphLayer {
         GraphLayer {
             cnx: HashMap::with_capacity(INITIAL_CAPACITY),

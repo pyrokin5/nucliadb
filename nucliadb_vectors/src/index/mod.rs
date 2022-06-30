@@ -149,7 +149,12 @@ impl Index {
     pub fn commit(&mut self) {
         #[cfg(feature = "dhat-ad-hoc")]
         dhat::ad_hoc_event(1000);
-
+        {
+            self.layers_out.iter().enumerate().for_each(|(id, sout)| {
+                println!("Layer {id}");
+                sout.report();
+            })
+        }
         for i in 0..self.layers_len {
             let mut rw_txn = self.lmdb_driver.rw_txn();
             self.lmdb_driver
