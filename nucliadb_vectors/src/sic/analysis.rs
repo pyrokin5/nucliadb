@@ -27,13 +27,13 @@ use nucliadb_vectors::service::{VectorWriterService, VectorReaderService};
 use prost::Message;
 use tempdir::TempDir;
 
-#[cfg(feature = "dhat-heap")]
+#[cfg(feature = "dhat-ad-hoc")]
 #[global_allocator]
 static ALLOC: dhat::Alloc = dhat::Alloc;
 
 pub fn main() -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(feature = "dhat-heap")]
-    let _profiler = dhat::Profiler::new_heap();
+    #[cfg(feature = "dhat-ad-hoc")]
+    let _profiler = dhat::Profiler::new_ad_hoc();
 
     let rt = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)

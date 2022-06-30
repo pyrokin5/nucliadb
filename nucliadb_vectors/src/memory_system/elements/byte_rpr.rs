@@ -202,6 +202,7 @@ impl ByteRpr for GraphLayer {
             cnx.insert(key, edges);
             segment_start = edges_end;
         }
+        cnx.shrink_to_fit();
         GraphLayer { cnx }
     }
 }
