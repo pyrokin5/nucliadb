@@ -129,6 +129,9 @@ impl Index {
     pub fn new_writer(location: &Path) -> RResult<(Index, WMode)> {
         let dictionary_address = location.join(Self::DICTIONARY_PATH);
         let graph_address = location.join(Self::GRAPH_PATH);
+        if !location.exists() {
+            std::fs::create_dir_all(location)?;
+        }
         if !graph_address.exists() {
             std::fs::create_dir(&graph_address)?;
         }
@@ -146,6 +149,9 @@ impl Index {
     pub fn new_reader(location: &Path) -> RResult<(Index, RMode)> {
         let dictionary_address = location.join(Self::DICTIONARY_PATH);
         let graph_address = location.join(Self::GRAPH_PATH);
+        if !location.exists() {
+            std::fs::create_dir_all(location)?;
+        }
         if !graph_address.exists() {
             std::fs::create_dir(&graph_address)?;
         }

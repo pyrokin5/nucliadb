@@ -201,12 +201,7 @@ impl ReaderChild for RelationsReaderService {
 
 impl RelationsReaderService {
     pub fn start(config: &RelationConfig) -> InternalResult<Self> {
-        let path = std::path::Path::new(&config.path);
-        if !path.exists() {
-            Ok(RelationsReaderService::new(config).unwrap())
-        } else {
-            Ok(RelationsReaderService::open(config).unwrap())
-        }
+        Self::open(config).or_else(|_| Self::new(config))
     }
     pub fn new(config: &RelationConfig) -> InternalResult<Self> {
         let path = std::path::Path::new(&config.path);
