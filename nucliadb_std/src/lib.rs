@@ -18,34 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-pub mod directory;
-pub mod key_value;
-pub mod trie;
-pub mod vector;
-use thiserror::Error;
-
-pub mod prelude {
-    pub use key_value::Slot;
-    pub use {bincode, serde};
-
-    pub use super::{key_value, trie, usize_utils, vector};
-}
-
-#[derive(Debug, Error)]
-pub enum DiskErr {
-    #[error("Serialization error: {0}")]
-    SerErr(#[from] bincode::Error),
-    #[error("IO error: {0}")]
-    IoErr(#[from] std::io::Error),
-}
-
-pub type DiskR<O> = Result<O, DiskErr>;
-
-pub mod usize_utils {
-    pub const USIZE_LEN: usize = (usize::BITS / 8) as usize;
-    pub fn usize_from_slice_le(v: &[u8]) -> usize {
-        let mut buff = [0; USIZE_LEN];
-        buff.copy_from_slice(v);
-        usize::from_le_bytes(buff)
-    }
-}
+pub mod fs;
+pub mod protos;
+pub mod tantivy;
+pub mod thread;

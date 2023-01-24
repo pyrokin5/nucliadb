@@ -29,6 +29,7 @@ use std::time::SystemTime;
 use std::{fs, io, path};
 
 use disk_hnsw::DiskHnsw;
+use key_value::Slot;
 use memmap2::Mmap;
 use node::Node;
 use ops_hnsw::{DataRetriever, HnswOps};
@@ -37,8 +38,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 pub use uuid::Uuid as DpId;
 
-use crate::disk::prelude::*;
-use crate::utils::DeleteLog;
+use crate::data_types::{key_value, trie, trie_ram, vector, DeleteLog};
 
 mod file_names {
     pub const NODES: &str = "nodes.kv";
@@ -168,10 +168,9 @@ impl Default for LabelDictionary {
 }
 impl LabelDictionary {
     pub fn new(mut labels: Vec<String>) -> LabelDictionary {
-        use crate::{disk, utils};
         labels.sort();
-        let ram_trie = utils::trie::create_trie(&labels);
-        LabelDictionary(disk::trie::serialize(ram_trie))
+        let ram_trie = trie_ram::create_trie(&labels);
+        LabelDictionary(trie::serialize(ram_trie))
     }
 }
 #[derive(Clone, Debug)]

@@ -20,8 +20,8 @@
 
 use std::io;
 
+use super::trie_ram::*;
 use super::usize_utils::*;
-use crate::utils::trie::*;
 
 const ADJ_HEADER: usize = 1 + USIZE_LEN;
 const EDGE_LEN: usize = 1 + USIZE_LEN;

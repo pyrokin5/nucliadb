@@ -2109,6 +2109,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "nucliadb_std"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "fs2",
+ "nucliadb_protos",
+ "prost-types",
+ "rayon",
+ "serde",
+ "tantivy 0.17.0",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
 name = "nucliadb_telemetry"
 version = "0.1.0"
 dependencies = [
@@ -2140,6 +2155,7 @@ dependencies = [
  "log",
  "memmap2",
  "nucliadb_service_interface",
+ "nucliadb_std",
  "rand 0.8.5",
  "rayon",
  "regex",

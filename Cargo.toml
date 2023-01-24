@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+  "nucliadb_std",
   "nucliadb_telemetry",
   "nucliadb_protos/rust",
   "nucliadb_cluster",

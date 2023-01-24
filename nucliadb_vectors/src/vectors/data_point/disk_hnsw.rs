@@ -49,7 +49,7 @@ use std::io;
 use super::ops_hnsw::{Hnsw, Layer};
 use super::ram_hnsw::{Edge, EntryPoint, RAMHnsw};
 use super::Address;
-use crate::disk::usize_utils::*;
+use crate::data_types::usize_utils::*;
 
 const EDGE_LEN: usize = 4;
 const NODE_LEN: usize = USIZE_LEN;

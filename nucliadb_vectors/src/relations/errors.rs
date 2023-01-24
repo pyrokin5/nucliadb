@@ -20,8 +20,6 @@
 
 use tantivy::TantivyError;
 
-use crate::disk::DiskErr;
-
 #[derive(Debug, thiserror::Error)]
 pub enum RelationsErr {
     #[error("Graph error: {0}")]
@@ -30,8 +28,6 @@ pub enum RelationsErr {
     BincodeError(#[from] bincode::Error),
     #[error("IO error: {0}")]
     IOError(#[from] std::io::Error),
-    #[error("Disk error: {0}")]
-    DiskError(#[from] DiskErr),
     #[error("Tantivy error: {0}")]
     TantivyError(#[from] TantivyError),
     #[error("Database is full")]

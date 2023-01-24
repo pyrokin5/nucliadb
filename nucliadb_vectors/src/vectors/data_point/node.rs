@@ -20,9 +20,9 @@
 
 use std::io;
 
-use crate::disk;
-use crate::disk::key_value::Slot;
-use crate::disk::usize_utils::{usize_from_slice_le, USIZE_LEN};
+use crate::data_types::key_value::Slot;
+use crate::data_types::trie;
+use crate::data_types::usize_utils::*;
 
 // Nodes are the main element of the system. The following data is stored inside them:
 // -> vector: Vec<u8> used for building a hnsw index with them (is a serialized Vec<f32>).
@@ -122,7 +122,7 @@ impl Node {
     // x must be serialized using Node, may have trailing bytes.
     pub fn has_label(x: &[u8], label: &[u8]) -> bool {
         let xlabel_ptr = usize_from_slice_le(&x[LABEL_START.0..LABEL_START.1]);
-        disk::trie::has_word(&x[xlabel_ptr..], label)
+        trie::has_word(&x[xlabel_ptr..], label)
     }
 }
 impl Slot for Node {
@@ -142,11 +142,10 @@ impl Slot for Node {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::disk::vector;
-    use crate::utils;
+    use crate::data_types::{trie_ram, vector};
     lazy_static::lazy_static! {
-        static ref NO_LABELS_TRIE: Vec<u8> = disk::trie::serialize(utils::trie::create_trie(&NO_LABELS));
-        static ref LABELS_TRIE: Vec<u8> = disk::trie::serialize(utils::trie::create_trie(&LABELS));
+        static ref NO_LABELS_TRIE: Vec<u8> = trie::serialize(trie_ram::create_trie(&NO_LABELS));
+        static ref LABELS_TRIE: Vec<u8> = trie::serialize(trie_ram::create_trie(&LABELS));
     }
     const NO_LABELS: [&[u8]; 0] = [];
     const LABELS: [&[u8]; 3] = [b"L1", b"L2", b"L3"];

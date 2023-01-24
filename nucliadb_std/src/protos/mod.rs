@@ -18,6 +18,5 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-pub mod data_types;
-pub mod relations;
-pub mod vectors;
+pub use nucliadb_protos::*;
+pub use prost_types::*;

@@ -27,8 +27,17 @@ use std::time::SystemTime;
 use fs2::FileExt;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use thiserror::Error;
 
-use super::DiskR;
+pub type FsResult<O> = std::result::Result<O, FsError>;
+
+#[derive(Debug, Error)]
+pub enum FsError {
+    #[error("Serialization error: {0}")]
+    SerErr(#[from] bincode::Error),
+    #[error("IO error: {0}")]
+    IoErr(#[from] std::io::Error),
+}
 
 mod names {
     pub const LOCK: &str = "lk.lock";
@@ -39,7 +48,7 @@ mod names {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Version(SystemTime);
 
-fn write_state<S>(path: &Path, state: &S) -> DiskR<()>
+fn write_state<S>(path: &Path, state: &S) -> FsResult<()>
 where S: Serialize {
     let temporal_path = path.join(names::TEMP);
     let state_path = path.join(names::STATE);
@@ -56,7 +65,7 @@ where S: Serialize {
     Ok(())
 }
 
-fn read_state<S>(path: &Path) -> DiskR<S>
+fn read_state<S>(path: &Path) -> FsResult<S>
 where S: DeserializeOwned {
     let mut file = BufReader::new(
         OpenOptions::new()
@@ -66,7 +75,7 @@ where S: DeserializeOwned {
     Ok(bincode::deserialize_from(&mut file)?)
 }
 
-pub fn initialize_disk<S, F>(path: &Path, with: F) -> DiskR<()>
+pub fn initialize_disk<S, F>(path: &Path, with: F) -> FsResult<()>
 where
     F: Fn() -> S,
     S: Serialize,
@@ -77,23 +86,23 @@ where
     Ok(())
 }
 
-pub fn exclusive_lock(path: &Path) -> DiskR<ELock> {
+pub fn exclusive_lock(path: &Path) -> FsResult<ELock> {
     Ok(ELock::new(path)?)
 }
-pub fn shared_lock(path: &Path) -> DiskR<SLock> {
+pub fn shared_lock(path: &Path) -> FsResult<SLock> {
     Ok(SLock::new(path)?)
 }
 
-pub fn persist_state<S>(lock: &ELock, state: &S) -> DiskR<()>
+pub fn persist_state<S>(lock: &ELock, state: &S) -> FsResult<()>
 where S: Serialize {
     write_state(lock.as_ref(), state)
 }
 
-pub fn load_state<S>(lock: &Lock) -> DiskR<S>
+pub fn load_state<S>(lock: &Lock) -> FsResult<S>
 where S: DeserializeOwned {
     read_state(lock.as_ref())
 }
-pub fn crnt_version(lock: &Lock) -> DiskR<Version> {
+pub fn crnt_version(lock: &Lock) -> FsResult<Version> {
     let meta = std::fs::metadata(lock.path.join(names::STATE))?;
     Ok(Version(meta.modified()?))
 }

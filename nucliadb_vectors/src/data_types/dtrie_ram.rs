@@ -22,19 +22,12 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::DeleteLog;
-
 #[derive(Clone, Serialize, Deserialize)]
 pub struct DTrie<Prop> {
     value: Option<Prop>,
     go_table: HashMap<u8, Box<DTrie<Prop>>>,
 }
 
-impl<Prop: std::marker::Sync> DeleteLog for DTrie<Prop> {
-    fn is_deleted(&self, key: &str) -> bool {
-        self.get(key.as_bytes()).is_some()
-    }
-}
 impl<Prop> Default for DTrie<Prop> {
     fn default() -> Self {
         DTrie::new()
