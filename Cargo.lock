@@ -2034,6 +2034,7 @@ dependencies = [
  "regex",
  "ring",
  "serde",
+ "tantivy",
  "tempfile",
  "thiserror",
  "tracing",
@@ -2075,7 +2076,6 @@ dependencies = [
  "prost-types",
  "rayon",
  "serde",
- "tantivy",
  "tempfile",
  "thiserror",
 ]

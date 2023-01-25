@@ -20,5 +20,4 @@
 
 pub mod fs;
 pub mod protos;
-pub mod tantivy;
 pub mod thread;
