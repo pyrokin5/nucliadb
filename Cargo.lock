@@ -2070,6 +2070,7 @@ dependencies = [
 name = "nucliadb_std"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bincode",
  "fs2",
  "nucliadb_protos",

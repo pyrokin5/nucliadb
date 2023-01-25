@@ -21,3 +21,4 @@
 pub mod fs;
 pub mod protos;
 pub mod thread;
+pub mod index_interface;
