@@ -21,7 +21,7 @@
 use std::collections::{HashMap, HashSet, LinkedList};
 
 use super::errors::*;
-use crate::relations::graph_db::*;
+use crate::graph_db::*;
 
 // BfsGuide allows the user to modify how the search will be performed.
 // By default a BfsGuide does not interfere in the search.
@@ -156,7 +156,7 @@ mod test {
     use std::path::Path;
 
     use super::*;
-    use crate::relations::graph_test_utils::*;
+    use crate::graph_test_utils::*;
     fn graph(dir: &Path) -> (Vec<Entity>, GraphDB) {
         let graphdb = GraphDB::new(dir, SIZE).unwrap();
         let mut txn = graphdb.rw_txn().unwrap();

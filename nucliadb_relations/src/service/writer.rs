@@ -27,8 +27,8 @@ use nucliadb_service_interface::prelude::*;
 use tracing::*;
 
 use super::utils::*;
-use crate::relations::errors::RelationsErr as InnerErr;
-use crate::relations::index::*;
+use crate::errors::RelationsErr as InnerErr;
+use crate::index::*;
 
 pub struct RelationsWriterService {
     wmode: WMode,

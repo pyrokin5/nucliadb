@@ -18,7 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-use tantivy::TantivyError;
+use nucliadb_std::tantivy::TantivyError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RelationsErr {

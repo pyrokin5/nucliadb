@@ -2,6 +2,7 @@
 
 members = [
   "nucliadb_std",
+  "nucliadb_relations",
   "nucliadb_telemetry",
   "nucliadb_protos/rust",
   "nucliadb_cluster",

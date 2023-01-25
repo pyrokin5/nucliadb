@@ -28,8 +28,8 @@ use tracing::*;
 
 use super::bfs::GrpcGuide;
 use super::utils::*;
-use crate::relations::index::*;
-use crate::relations::relations_io;
+use crate::index::*;
+use crate::relations_io;
 
 pub struct RelationsReaderService {
     rmode: RMode,

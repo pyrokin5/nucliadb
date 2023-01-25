@@ -18,8 +18,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-mod data_types;
-pub mod data_point;
-pub mod data_point_provider;
-pub mod indexset;
+mod bfs_engine;
+mod errors;
+mod graph_db;
+#[cfg(test)]
+mod graph_test_utils;
+pub mod index;
+mod node_dictionary;
+mod relations_io;
 pub mod service;

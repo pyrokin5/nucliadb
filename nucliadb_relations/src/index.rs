@@ -21,7 +21,7 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use super::bfs_engine::{BfsEngineBuilder, BfsGuide};
+use crate::bfs_engine::{BfsEngineBuilder, BfsGuide};
 use super::errors::*;
 pub use super::graph_db::{Entity, GCnx};
 use super::graph_db::{GraphDB, RoToken, RwToken};

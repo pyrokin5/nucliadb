@@ -108,7 +108,7 @@ impl IoEdge {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::relations::graph_db::*;
+    use crate::graph_db::*;
     #[test]
     fn graph_insertion() {
         let dir = tempfile::tempdir().unwrap();

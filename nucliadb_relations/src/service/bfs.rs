@@ -23,9 +23,9 @@ use std::fmt::Debug;
 
 use tracing::*;
 
-use crate::relations::bfs_engine::*;
-use crate::relations::errors::*;
-use crate::relations::index::*;
+use crate::bfs_engine::*;
+use crate::errors::*;
+use crate::index::*;
 
 pub struct GrpcGuide<'a> {
     pub reader: &'a GraphReader<'a>,

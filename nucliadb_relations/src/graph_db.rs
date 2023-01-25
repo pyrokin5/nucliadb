@@ -321,7 +321,7 @@ mod tests {
     use std::collections::HashSet;
 
     use super::*;
-    use crate::relations::graph_test_utils::*;
+    use crate::graph_test_utils::*;
 
     #[test]
     fn creation_test() {

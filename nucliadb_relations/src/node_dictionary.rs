@@ -21,10 +21,10 @@
 use std::path::Path;
 
 use itertools::Itertools;
-use tantivy::collector::TopDocs;
-use tantivy::query::RegexQuery;
-use tantivy::schema::{Field, Schema, Term, TextFieldIndexing, TextOptions, STORED, STRING};
-use tantivy::{doc, Index, IndexReader, IndexWriter, ReloadPolicy};
+use nucliadb_std::tantivy::collector::TopDocs;
+use nucliadb_std::tantivy::query::RegexQuery;
+use nucliadb_std::tantivy::schema::{Field, Schema, Term, TextFieldIndexing, TextOptions, STORED, STRING};
+use nucliadb_std::tantivy::{doc, Index, IndexReader, IndexWriter, ReloadPolicy};
 
 use super::errors::*;
 use super::relations_io::IoNode;
