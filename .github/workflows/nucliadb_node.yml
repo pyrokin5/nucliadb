@@ -18,7 +18,6 @@ on:
       - "nucliadb_telemetry/**"
       - "nucliadb_node/**"
       - "nucliadb_vectors/**"
-      - "nucliadb_vectors2/**"
       - "nucliadb_relations/**"
       - "nucliadb_cluster/src/**"
       - "nucliadb_telemetry/src/**"

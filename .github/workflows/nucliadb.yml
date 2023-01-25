@@ -16,7 +16,7 @@ on:
       - "nucliadb_paragraphs_tantivy/**"
       - "nucliadb_relations/**"
       - "nucliadb_node/**"
-      - "nucliadb_vectors2/**"
+      - "nucliadb_vectors/**"
       - "nucliadb_protos/**"
   push:
     branches:
@@ -31,7 +31,7 @@ on:
       - "nucliadb_paragraphs_tantivy/**"
       - "nucliadb_relations/**"
       - "nucliadb_node/**"
-      - "nucliadb_vectors2/**"
+      - "nucliadb_vectors/**"
       - "nucliadb_protos/**"
 
 jobs:
