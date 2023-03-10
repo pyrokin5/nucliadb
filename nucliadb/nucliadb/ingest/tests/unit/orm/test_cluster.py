@@ -22,7 +22,7 @@ from unittest import mock
 
 import pytest
 
-from nucliadb.ingest import orm
+from nucliadb.ingest.orm import cluster
 from nucliadb.ingest.orm.exceptions import NodeClusterSmall
 from nucliadb.ingest.orm.node import Node, NodeType
 from nucliadb.ingest.settings import settings
@@ -36,51 +36,51 @@ def nodes():
         "node-2": Node("node-2", NodeType.IO, shard_count=30, load_score=0, dummy=True),
         "node-3": Node("node-3", NodeType.IO, shard_count=40, load_score=0, dummy=True),
     }
-    with mock.patch.object(orm, "NODES", new=nodes):
+    with mock.patch.object(cluster, "NODES", new=nodes):
         yield nodes
 
 
 def test_find_nodes(nodes):
-    cluster = orm.ClusterObject()
+    cluster = cluster.ClusterObject()
     nodes_found = cluster.find_nodes()
     assert len(nodes_found) == settings.node_replicas
     assert nodes_found == ["node-1", "node-0"]
 
 
 def test_find_nodes_exclude_nodes(nodes):
-    cluster = orm.ClusterObject()
+    cc = cluster.ClusterObject()
     excluded_node = "node-1"
-    nodes_found = cluster.find_nodes(exclude_nodes=[excluded_node])
+    nodes_found = cc.find_nodes(exclude_nodes=[excluded_node])
     assert len(nodes_found) == settings.node_replicas
     assert excluded_node not in nodes_found
 
     with pytest.raises(NodeClusterSmall):
         all_nodes = list(nodes.keys())
-        cluster.find_nodes(exclude_nodes=all_nodes)
+        cc.find_nodes(exclude_nodes=all_nodes)
 
 
 def test_find_nodes_raises_error_if_not_enough_nodes_are_found(nodes):
-    cluster = orm.ClusterObject()
+    cc = cluster.ClusterObject()
 
     prev = settings.node_replicas
     settings.node_replicas = 200
 
     with pytest.raises(NodeClusterSmall):
-        cluster.find_nodes()
+        cc.find_nodes()
 
     settings.node_replicas = prev
 
 
 def test_find_nodes_checks_max_node_shards_only_if_set(nodes):
-    cluster = orm.ClusterObject()
+    cc = cluster.ClusterObject()
 
     prev = settings.max_node_shards
     settings.max_node_shards = 0
 
     with pytest.raises(NodeClusterSmall):
-        cluster.find_nodes()
+        cc.find_nodes()
 
     settings.max_node_shards = -1
-    assert len(cluster.find_nodes())
+    assert len(cc.find_nodes())
 
     settings.max_node_shards = prev

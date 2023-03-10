@@ -137,7 +137,7 @@ async def main():
     logger.info("FINISH PURGING KB STORAGE")
 
 
-def run() -> int:
+def run() -> int:  # pragma: no cover
     if running_settings.sentry_url and SENTRY:
         set_sentry(
             running_settings.sentry_url,

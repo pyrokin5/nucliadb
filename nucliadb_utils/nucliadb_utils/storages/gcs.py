@@ -34,9 +34,9 @@ import google.auth.transport.requests  # type: ignore
 import yarl
 from google.oauth2 import service_account  # type: ignore
 from nucliadb_protos.resources_pb2 import CloudFile
-from nucliadb_telemetry.utils import get_telemetry, init_telemetry
 from opentelemetry.instrumentation.aiohttp_client import create_trace_config
 
+from nucliadb_telemetry.utils import get_telemetry, init_telemetry
 from nucliadb_utils import logger
 from nucliadb_utils.storages import CHUNK_SIZE
 from nucliadb_utils.storages.exceptions import (
@@ -94,6 +94,7 @@ class GCSStorageField(StorageField):
         origin_bucket_name: str,
         destination_bucket_name: str,
     ):
+        breakpoint()
         await self.copy(
             origin_uri, destination_uri, origin_bucket_name, destination_bucket_name
         )

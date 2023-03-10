@@ -331,8 +331,8 @@ async def transaction_utility(natsd, event_loop):
 THUMBNAIL = rpb.CloudFile(
     uri="thumbnail.png",
     source=rpb.CloudFile.Source.LOCAL,
-    bucket_name="/orm/assets",
-    size=getsize(f"{dirname(__file__)}/orm/assets/thumbnail.png"),
+    bucket_name="/assets/orm",
+    size=getsize(f"{dirname(__file__)}/assets/orm/thumbnail.png"),
     content_type="image/png",
     filename="thumbnail.png",
 )
@@ -341,8 +341,8 @@ TEST_CLOUDFILE_FILENAME = "text.pb"
 TEST_CLOUDFILE = rpb.CloudFile(
     uri=TEST_CLOUDFILE_FILENAME,
     source=rpb.CloudFile.Source.LOCAL,
-    bucket_name="/orm/assets",
-    size=getsize(f"{dirname(__file__)}/orm/assets/{TEST_CLOUDFILE_FILENAME}"),
+    bucket_name="/assets/orm",
+    size=getsize(f"{dirname(__file__)}/assets/orm/{TEST_CLOUDFILE_FILENAME}"),
     content_type="application/octet-stream",
     filename=TEST_CLOUDFILE_FILENAME,
     md5="01cca3f53edb934a445a3112c6caa652",

@@ -27,6 +27,7 @@ from nucliadb_protos.resources_pb2 import FieldType
 
 from nucliadb.ingest.fields.layout import Layout
 from nucliadb.ingest.orm.knowledgebox import KnowledgeBox
+from nucliadb.ingest.tests.assets import ASSETS_PATH
 from nucliadb_utils.storages.storage import Storage
 
 
@@ -89,12 +90,12 @@ async def test_create_resource_orm_field_layout_file(
     l2.body.blocks["field1"].ident = "ident1"
     l2.body.blocks["field1"].payload = "{}"
 
-    filename = f"{dirname(__file__)}/assets/file.png"
+    filename = f"{ASSETS_PATH}/orm/file.png"
 
     cf1 = CloudFile(
         uri="file.png",
         source=CloudFile.Source.LOCAL,
-        bucket_name="/orm/assets",
+        bucket_name="/assets/orm",
         size=getsize(filename),
         content_type="image/png",
         filename="file.png",

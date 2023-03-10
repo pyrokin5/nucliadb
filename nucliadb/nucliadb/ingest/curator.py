@@ -358,14 +358,14 @@ async def main(arguments: Arguments):
     logger.info("END CURATOR KB")
 
 
-def parse() -> Arguments:
+def parse() -> Arguments:  # pragma: no cover
     parser = argparse.ArgumentParser(description="Curator")
     parser.add_argument("--dryrun", help="DryRun", action="store_true")
 
     return cast(Arguments, parser.parse_args())
 
 
-def run() -> int:
+def run() -> int:  # pragma: no cover
     if running_settings.sentry_url and SENTRY:
         set_sentry(
             running_settings.sentry_url,

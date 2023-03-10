@@ -18,7 +18,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from datetime import datetime
-from os.path import dirname, getsize
+from os.path import getsize
 from uuid import uuid4
 
 import pytest
@@ -28,6 +28,7 @@ from nucliadb_protos.resources_pb2 import FieldType, Message, MessageContent
 
 from nucliadb.ingest.fields.conversation import PAGE_SIZE, Conversation
 from nucliadb.ingest.orm.knowledgebox import KnowledgeBox
+from nucliadb.ingest.tests.assets import ASSETS_PATH
 from nucliadb_utils.storages.storage import Storage
 
 
@@ -91,12 +92,12 @@ async def test_create_resource_orm_field_conversation_file(
     conv1.content.text = "hello"
     conv1.content.format = MessageContent.Format.PLAIN
 
-    filename = f"{dirname(__file__)}/assets/file.png"
+    filename = f"{ASSETS_PATH}/orm/file.png"
 
     cf1 = CloudFile(
         uri="file.png",
         source=CloudFile.Source.LOCAL,
-        bucket_name="/orm/assets",
+        bucket_name="/assets/orm",
         size=getsize(filename),
         content_type="image/png",
         filename="file.png",
