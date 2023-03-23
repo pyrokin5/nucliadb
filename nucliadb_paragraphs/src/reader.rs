@@ -719,6 +719,66 @@ mod tests {
     }
 
     #[test]
+    fn bugs_bunny() -> NodeResult<()> {
+        use std::path::Path;
+        use tantivy::collector::DocSetCollector;
+        use tantivy::query::AllQuery;
+
+        let path = Path::new(
+            "path/to/paragraph/index",
+        );
+        let schema = ParagraphSchema::default();
+        let index = Index::open_in_dir(path)?;
+        let reader = index
+            .reader_builder()
+            .reload_policy(ReloadPolicy::OnCommit)
+            .try_into()?;
+        let searcher = reader.searcher();
+        let query = Box::new(AllQuery) as Box<dyn Query>;
+        let collector = DocSetCollector;
+        let results = searcher.search(&query, &collector).unwrap();
+        for doc_address in results {
+            let doc = searcher.doc(doc_address)?;
+            let uuid = doc
+                .get_first(schema.uuid)
+                .expect("document doesn't appear to have uuid.")
+                .as_text()
+                .unwrap()
+                .to_string();
+            let field = doc
+                // This can be used instead of get_first() considering there is only one
+                // field. Done because of a bug in the writing
+                // process [sc 1604].
+                .get_all(schema.field)
+                .last()
+                .expect("document doesn't appear to have uuid.")
+                .as_facet()
+                .unwrap()
+                .to_path_string();
+
+            let start_pos = doc.get_first(schema.start_pos).unwrap().as_u64().unwrap();
+            let end_pos = doc.get_first(schema.end_pos).unwrap().as_u64().unwrap();
+            let metadata = schema.metadata(&doc).unwrap();
+            let mstart_pos = metadata.position.as_ref().map(|p| p.start).unwrap();
+            let mend_pos = metadata.position.as_ref().map(|p| p.end).unwrap();
+            let paragraph = doc
+                .get_first(schema.paragraph)
+                .expect("document doesn't appear to have end_pos.")
+                .as_text()
+                .unwrap()
+                .to_string();
+            let pos = paragraph.split("/").last().unwrap();
+            let values: Vec<u64> = pos.split("-").map(|v| v.parse().unwrap()).collect();
+            let (kstart_pos, kend_pos) = (values[0], values[1]);
+            if (kstart_pos, kend_pos) != (mstart_pos, mend_pos) {
+                println!("{uuid}{field}");
+                println!("with position: {start_pos}-{end_pos}");
+                println!("with meta: {kstart_pos}-{kend_pos}");
+            }
+        }
+        Ok(())
+    }
+    #[test]
     fn test_new_paragraph() -> NodeResult<()> {
         let dir = TempDir::new().unwrap();
         let psc = ParagraphConfig {
