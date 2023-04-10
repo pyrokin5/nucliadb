@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import logging
 import os
 import sys
 
@@ -26,7 +25,6 @@ import uvicorn  # type: ignore
 from fastapi.staticfiles import StaticFiles
 
 from nucliadb.config import config_nucliadb
-from nucliadb.logging import log_config
 from nucliadb.settings import Settings
 
 
@@ -75,8 +73,8 @@ def run_nucliadb(nucliadb_args: Settings):
         application,
         host="0.0.0.0",
         port=nucliadb_args.http,
-        log_config=log_config,
-        log_level=logging.getLevelName(running_settings.log_level),
+        log_config=None,
+        log_level=None,
         debug=True,
         reload=False,
     )
@@ -89,8 +87,8 @@ async def run_async_nucliadb(nucliadb_args: Settings):
     config = uvicorn.Config(
         application,
         port=nucliadb_args.http,
-        log_level=logging.getLevelName(running_settings.log_level),
-        log_config=log_config,
+        log_config=None,
+        log_level=None,
     )
     server = uvicorn.Server(config)
     config.load()
