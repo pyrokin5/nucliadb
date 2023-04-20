@@ -40,6 +40,10 @@ class FileDataMangaer:
     key = None
     _ttl = 60 * 50 * 5  # 5 minutes should be plenty of time between activity
 
+    def clear(self) -> None:
+        self._data = None
+        self._loaded = False
+
     async def finalize(self):
         ...
 

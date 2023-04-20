@@ -113,6 +113,7 @@ def get_dm() -> FileDataMangaer:  # type: ignore
         else:
             FDM = FileDataMangaer()
 
+    FDM.clear()
     return FDM
 
 
