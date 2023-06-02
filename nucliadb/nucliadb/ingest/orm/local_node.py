@@ -19,6 +19,7 @@
 #
 from __future__ import annotations
 
+import asyncio
 from typing import Optional
 from uuid import uuid4
 
@@ -65,6 +66,10 @@ class LocalNodeSidecarInterface:
         return response
 
 
+GC_CHECK_THRESHOLD = 1000
+GC_HIGH_WATCH_THREADHOLD = GC_CHECK_THRESHOLD * 2
+
+
 class LocalNode(AbstractNode):
     _writer: LocalWriterWrapper
     _reader: LocalReaderWrapper
@@ -75,6 +80,11 @@ class LocalNode(AbstractNode):
         self._reader = LocalReaderWrapper()
         self.address = "local"
         self.sidecar = LocalNodeSidecarInterface(self._reader)
+
+        # gc on startup
+        self._gb_counter = GC_CHECK_THRESHOLD + 1
+        self._gb_timer: Optional[asyncio.TimerHandle] = None
+        self._maybe_gc()
 
     @property
     def reader(self) -> LocalReaderWrapper:  # type: ignore
@@ -138,15 +148,39 @@ class LocalNode(AbstractNode):
         else:
             return None
 
+    def _maybe_gc(self) -> None:
+        self._gb_counter += 1
+        if self._gb_counter > GC_CHECK_THRESHOLD:
+            if self._gb_timer is not None:
+                if self._gb_counter > GC_HIGH_WATCH_THREADHOLD:
+                    # too late, schedule a gc now
+                    return
+                self._gb_timer.cancel()
+                self._gb_timer = None
+
+            self._gb_timer = asyncio.get_event_loop().call_later(
+                1, lambda: asyncio.create_task(self._gc())
+            )
+
+    async def _gc(self) -> None:
+        self._gb_counter = 0
+        shards = await self.writer.ListShards(noderesources_pb2.EmptyQuery())
+        for shard in shards.ids:
+            await self.writer.GC(shard)
+
     async def add_resource(
         self, req: noderesources_pb2.Resource
     ) -> nodewriter_pb2.OpStatus:
-        return await self.writer.SetResource(req)
+        result = await self.writer.SetResource(req)
+        self._maybe_gc()
+        return result
 
     async def delete_resource(
         self, req: noderesources_pb2.ResourceID
     ) -> nodewriter_pb2.OpStatus:
-        return await self.writer.RemoveResource(req)
+        result = await self.writer.RemoveResource(req)
+        self._maybe_gc()
+        return result
 
     def __str__(self):
         return "LOCAL NODE"

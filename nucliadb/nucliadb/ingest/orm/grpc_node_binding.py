@@ -363,3 +363,9 @@ class LocalWriterWrapper:
         op_status = OpStatus()
         op_status.ParseFromString(pb_bytes)
         return op_status
+
+    async def GC(self, request: ShardId):
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            self.executor, self.writer.gc, request.SerializeToString()
+        )
