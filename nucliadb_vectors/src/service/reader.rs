@@ -325,6 +325,7 @@ mod tests {
             result_per_page: 20,
             reload: false,
             with_duplicates: true,
+            min_score: -1.0,
         };
         let result = reader.search(&request).unwrap();
         assert_eq!(result.documents.len(), 4);
@@ -338,6 +339,7 @@ mod tests {
             result_per_page: 20,
             reload: false,
             with_duplicates: false,
+            min_score: -1.0,
         };
         let result = reader.search(&request).unwrap();
         let no_nodes = reader.count("").unwrap();
