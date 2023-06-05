@@ -192,6 +192,7 @@ impl State {
         let filter = request.get_filter();
         let with_duplicates = request.with_duplicates();
         let no_results = request.no_results();
+        let min_score = request.min_score();
         let mut ffsv = Fssc::new(request.no_results());
         for journal in self.data_point_iterator().copied() {
             let delete_log = self.delete_log(journal);
@@ -204,6 +205,7 @@ impl State {
                     with_duplicates,
                     no_results,
                     similarity,
+                    min_score,
                 )
                 .for_each(|candidate| ffsv.add(candidate));
         }
@@ -220,7 +222,7 @@ impl State {
         }
     }
     pub fn replace_work_unit(&mut self, new: DataPoint) {
-        let Some(unit) = self.work_stack.pop_back() else { 
+        let Some(unit) = self.work_stack.pop_back() else {
             return;
         };
         let age_cap = self

@@ -18,15 +18,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 use std::path::PathBuf;
+
 use nucliadb_core::fs_state;
 use nucliadb_core::tracing::*;
 
 use super::merger::{MergeQuery, MergeRequest};
 use super::State;
 use crate::data_point::{DataPoint, DpId, Similarity};
-use crate::data_point_provider::merger;
 use crate::VectorR;
-
 
 pub(crate) struct Worker {
     location: PathBuf,

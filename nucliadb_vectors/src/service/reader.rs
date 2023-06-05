@@ -49,6 +49,9 @@ impl<'a> SearchRequest for (usize, &'a VectorSearchRequest, Formula) {
     fn no_results(&self) -> usize {
         self.0
     }
+    fn min_score(&self) -> f32 {
+        self.1.min_score
+    }
 }
 
 pub struct VectorReaderService {
