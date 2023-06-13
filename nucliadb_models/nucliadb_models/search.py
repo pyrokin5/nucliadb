@@ -351,12 +351,12 @@ class SearchParamDefaults:
     advanced_query = ParamDefault(
         default=None,
         title="Advanced query",
-        description="An advanced query to search for. See https://docs.nuclia.dev/docs/query/#advanced-query for examples of advanced queries.",  # noqa: E501
+        description="An advanced query to search for. See https://docs.nuclia.dev/docs/query/#advanced-query for examples of advanced queries syntax.",  # noqa: E501
     )
     fields = ParamDefault(
         default=[],
         title="Fields",
-        description="The list of fields to search in. For instance: `a/title` to search only on title field. For more details, see: https://docs.nuclia.dev/docs/query/#search-in-a-specific-field",  # noqa: E501
+        description="The list of fields to search in. For instance: `a/title` to search only on title field. For more details on filtering by field, see: https://docs.nuclia.dev/docs/query/#search-in-a-specific-field",  # noqa: E501
     )
     filters = ParamDefault(
         default=[],
@@ -401,7 +401,7 @@ class SearchParamDefaults:
     highlight = ParamDefault(
         default=False,
         title="Highlight",
-        description="If set to true, the query terms will be highlighted in the results between <mark>...</mark> tags",  # noqa: E501
+        description="If set to true, the query terms will be highlighted in the results between `<mark></mark>` tags",  # noqa: E501
     )
     with_duplicates = ParamDefault(
         default=False,
@@ -416,7 +416,7 @@ class SearchParamDefaults:
     with_synonyms = ParamDefault(
         default=False,
         title="With custom synonyms",
-        description="Whether to return matches for custom knowledge box synonyms of the query terms. Note: only supported for `paragraph` and `document` search options.",  # noqa: E501
+        description="Whether to return matches for knowledge box custom synonyms of the query terms. Note: only supported for `paragraph` and `document` search options.",  # noqa: E501
     )
     sort_order = ParamDefault(
         default=SortOrder.DESC,
@@ -462,27 +462,27 @@ class SearchParamDefaults:
     field_type_filter = ParamDefault(
         default=list(FieldTypeName),
         title="Field type filter",
-        description="Filter search results to match paragraphs of a specific field type.",
+        description="Filter search results to match paragraphs of a specific field type. E.g: `['conversation', 'text']`",  # noqa
     )
     range_creation_start = ParamDefault(
         default=None,
         title="Resource creation range start",
-        description="Resources created before this date will be filtered out of search results.",
+        description="Resources created before this date will be filtered out of search results. Datetime represented as a str in ISO 8601 format, like: 2008-09-15T15:53:00+05:00.",  # noqa
     )
     range_creation_end = ParamDefault(
         default=None,
         title="Resource creation range end",
-        description="Resources created after this date will be filtered out of search results.",
+        description="Resources created after this date will be filtered out of search results. Datetime represented as a str in ISO 8601 format, like: 2008-09-15T15:53:00+05:00.",  # noqa
     )
     range_modification_start = ParamDefault(
         default=None,
         title="Resource modification range start",
-        description="Resources modified before this date will be filtered out of search results.",
+        description="Resources modified before this date will be filtered out of search results. Datetime represented as a str in ISO 8601 format, like: 2008-09-15T15:53:00+05:00.",  # noqa
     )
     range_modification_end = ParamDefault(
         default=None,
         title="Resource modification range end",
-        description="Resources modified after this date will be filtered out of search results.",
+        description="Resources modified after this date will be filtered out of search results. Datetime represented as a str in ISO 8601 format, like: 2008-09-15T15:53:00+05:00.",  # noqa
     )
     vector = ParamDefault(
         default=None,
@@ -497,7 +497,7 @@ class SearchParamDefaults:
     chat_context = ParamDefault(
         default=None,
         title="Chat context",
-        description="Use to control the context that is passed as input to the Generative AI model. If not specified, it is generated automatically.",  # noqa
+        description="Use to control the context that is passed as input to the generative model. If not specified, it is generated automatically by trying to find matching paragraphs with the provided query.",  # noqa
     )
 
     chat_features = ParamDefault(

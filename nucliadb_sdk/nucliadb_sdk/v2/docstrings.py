@@ -183,13 +183,20 @@ def _inject_docstring(
         description = ""
         if path_param == "kbid":
             description = "The id of the knowledge box"
+        elif path_param == "rid":
+            description = "The id of the resource"
+        elif path_param == "field_id":
+            description = "The id of the field"
         params.append(f":param {path_param}: {description}")
+        params.append(f":type {path_param}: <class 'str'>")
+
     if request_type is not None:
         if isinstance(request_type, type) and issubclass(request_type, BaseModel):
             for field in request_type.__fields__.values():
                 params.append(
                     f":param {field.name}: {field.field_info.description or ''}"
                 )
+                params.append(f":type {field.name}: {field.outer_type_}")
     func_doc += "\n".join(params)
     func_doc += "\n"
 
