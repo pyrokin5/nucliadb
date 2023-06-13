@@ -45,6 +45,7 @@ from nucliadb_models.search import (
     FindRequest,
     KnowledgeboxFindResults,
     KnowledgeboxSearchResults,
+    KnowledgeboxSuggestResults,
     Relations,
     SearchRequest,
 )
@@ -492,6 +493,15 @@ class _NucliaDBBase:
         request_type=ChatRequest,
         response_type=chat_response_parser,
         docstring=docstrings.CHAT,
+    )
+    suggest = _request_builder(
+        "suggest",
+        path_template="/v1/kb/{kbid}/suggest",
+        method="GET",
+        path_params=("kbid",),
+        request_type=None,
+        response_type=KnowledgeboxSuggestResults,
+        docstrings=docstrings.SUGGEST,
     )
 
 

@@ -35,7 +35,7 @@ class Docstring(BaseModel):
 
 
 SEARCH = Docstring(
-    doc="""Search in your Knowledge Box""",
+    doc="""Search in your knowledge box""",
     examples=[
         Example(
             description="Advanced search on the full text index",
@@ -51,7 +51,7 @@ The Site Reliability Workbook.pdf
 )
 
 FIND = Docstring(
-    doc="""Find documents in your Knowledge Box""",
+    doc="""Find documents in your knowledge box""",
     examples=[
         Example(
             description="Find documents matching a query",
@@ -74,7 +74,7 @@ http://github.com/hermeGarcia
 )
 
 CHAT = Docstring(
-    doc="""Chat with your Knowledge Box""",
+    doc="""Chat with your knowledge box""",
     examples=[
         Example(
             description="Get an answer for a question that is part of the data in the Knowledge Box",
@@ -88,6 +88,20 @@ Yes, according to the provided context, France is expected to be in recession in
             code=""">>> content = ChatRequest(query="Who won the 2018 football World Cup?")
 >>> sdk.chat(kbid="mykbid", content=content).answer
 France won the 2018 football World Cup.
+""",
+        ),
+    ],
+)
+
+SUGGEST = Docstring(
+    doc="""Get query suggestions based on your knowledge box data""",
+    examples=[
+        Example(
+            description="Typo-tolerant suggestions are supported",
+            code=""">>> from nucliadb_sdk import *
+>>> sdk = NucliaDBSDK(api_key="api-key")
+>>> sdk.suggest(kbid="mykbid", query="Ablert Eisntien").paragraphs.results[0].text
+Albert Einstein, best known for developing the theory of relativity.
 """,
         ),
     ],
@@ -173,7 +187,7 @@ def _inject_docstring(
     docstring: Optional[Docstring] = None,
 ):
     # Initial description section
-    func_doc = f"Wrapper around the api endpoint {method.upper()} {path_template}\n\n"
+    func_doc = f"Wrapper of the API endpoint: `{method.upper()} {path_template}`\n\n"
     if docstring:
         func_doc += docstring.doc + "\n\n"
 
