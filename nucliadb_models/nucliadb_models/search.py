@@ -63,8 +63,6 @@ class ChatOptions(str, Enum):
 
 class SuggestOptions(str, Enum):
     PARAGRAPH = "paragraph"
-    ENTITIES = "entities"
-    INTENT = "intent"
 
 
 class NucliaDBClientType(str, Enum):
@@ -504,15 +502,6 @@ class SearchParamDefaults:
         default=[ChatOptions.PARAGRAPHS, ChatOptions.RELATIONS],
         title="Chat features",
         description="Features enabled for the chat endpoint. If `paragraphs` is included, the paragraphs from which the answer is generated are returned. If `relations` is included, a graph of entities related to the answer is returned.",  # noqa
-    )
-    suggest_features = ParamDefault(
-        default=[
-            SuggestOptions.PARAGRAPH,
-            SuggestOptions.ENTITIES,
-            SuggestOptions.INTENT,
-        ],
-        title="Suggest features",
-        description="Features enabled for the suggest endpoint.",
     )
 
 

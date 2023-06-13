@@ -60,7 +60,6 @@ async def suggest_knowledgebox(
     query: str = fastapi_query(SearchParamDefaults.suggest_query),
     fields: List[str] = fastapi_query(SearchParamDefaults.fields),
     filters: List[str] = fastapi_query(SearchParamDefaults.filters),
-    faceted: List[str] = fastapi_query(SearchParamDefaults.faceted),
     range_creation_start: Optional[datetime] = fastapi_query(
         SearchParamDefaults.range_creation_start
     ),
@@ -72,9 +71,6 @@ async def suggest_knowledgebox(
     ),
     range_modification_end: Optional[datetime] = fastapi_query(
         SearchParamDefaults.range_modification_end
-    ),
-    features: List[SuggestOptions] = fastapi_query(
-        SearchParamDefaults.suggest_features
     ),
     show: List[ResourceProperties] = fastapi_query(SearchParamDefaults.show),
     field_type_filter: List[FieldTypeName] = fastapi_query(
@@ -92,11 +88,10 @@ async def suggest_knowledgebox(
 
     # We need to query all nodes
     pb_query = await suggest_query_to_pb(
-        features,
+        [SuggestOptions.PARAGRAPH],
         query,
         fields,
         filters,
-        faceted,
         range_creation_start,
         range_creation_end,
         range_modification_start,
