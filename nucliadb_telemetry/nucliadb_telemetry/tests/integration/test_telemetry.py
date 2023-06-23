@@ -52,10 +52,12 @@ def debug_spans(spans):
 
 @pytest.mark.asyncio
 async def test_telemetry_dict(http_service: AsyncClient, greeter: Greeter):
+    trace_id = "f13dc5318bf3bef64a0a5ea607db93a1"
+
     resp = await http_service.get(
         "http://test/",
         headers={
-            "x-b3-traceid": "f13dc5318bf3bef64a0a5ea607db93a1",
+            "x-b3-traceid": trace_id,
             "x-b3-spanid": "bfc2225c60b39d97",
             "x-b3-sampled": "1",
         },
@@ -64,7 +66,7 @@ async def test_telemetry_dict(http_service: AsyncClient, greeter: Greeter):
 
     # Check that trace ids are returned in response headers
     assert resp.headers["X-NUCLIA-TRACE-ID"]
-    assert resp.headers["X-NUCLIA-TRACE-ID"] != "0"
+    assert resp.headers["X-NUCLIA-TRACE-ID"] == trace_id
     assert "X-NUCLIA-TRACE-ID" in resp.headers["Access-Control-Expose-Headers"]
 
     for i in range(10):
@@ -72,7 +74,7 @@ async def test_telemetry_dict(http_service: AsyncClient, greeter: Greeter):
             await asyncio.sleep(1)
     assert (
         greeter.messages[0].headers["x-b3-traceid"]
-        == "f13dc5318bf3bef64a0a5ea607db93a1"
+        == trace_id
     )
     assert len(greeter.messages) == 4
 
@@ -82,7 +84,7 @@ async def test_telemetry_dict(http_service: AsyncClient, greeter: Greeter):
     client = AsyncClient()
     for _ in range(10):
         resp = await client.get(
-            f"http://localhost:{telemetry_settings.jaeger_query_port}/api/traces/f13dc5318bf3bef64a0a5ea607db93a1",
+            f"http://localhost:{telemetry_settings.jaeger_query_port}/api/traces/{trace_id}",
             headers={"Accept": "application/json"},
         )
         if (
@@ -93,7 +95,7 @@ async def test_telemetry_dict(http_service: AsyncClient, greeter: Greeter):
         else:
             break
 
-    assert resp.json()["data"][0]["traceID"] == "f13dc5318bf3bef64a0a5ea607db93a1"
+    assert resp.json()["data"][0]["traceID"] == trace_id
 
     # Enable this block for debugging purposes, to see sunmmarized and sorted details of all spans
     # debug_spans(resp.json()["data"][0]["spans"])
