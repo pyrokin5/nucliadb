@@ -36,6 +36,8 @@ from nucliadb_models.common import FieldTypeName
 from nucliadb_models.metadata import ResourceProcessingStatus
 from nucliadb_models.resource import ExtractedDataTypeName, NucliaDBRoles
 from nucliadb_models.search import (
+    FacetRequest,
+    FilterRequest,
     KnowledgeboxSearchResults,
     NucliaDBClientType,
     ResourceProperties,
@@ -89,9 +91,9 @@ async def search_knowledgebox(
     kbid: str,
     query: str = fastapi_query(SearchParamDefaults.query),
     advanced_query: Optional[str] = fastapi_query(SearchParamDefaults.advanced_query),
-    fields: List[str] = fastapi_query(SearchParamDefaults.fields),
-    filters: List[str] = fastapi_query(SearchParamDefaults.filters),
-    faceted: List[str] = fastapi_query(SearchParamDefaults.faceted),
+    fields: list[str] = fastapi_query(SearchParamDefaults.fields),
+    filters: list[FilterRequest] = fastapi_query(SearchParamDefaults.filters),
+    faceted: list[FacetRequest] = fastapi_query(SearchParamDefaults.faceted),
     sort_field: SortField = fastapi_query(SearchParamDefaults.sort_field),
     sort_limit: Optional[int] = fastapi_query(SearchParamDefaults.sort_limit),
     sort_order: SortOrder = fastapi_query(SearchParamDefaults.sort_order),
@@ -187,8 +189,8 @@ async def catalog(
     response: Response,
     kbid: str,
     query: str = fastapi_query(SearchParamDefaults.query),
-    filters: List[str] = fastapi_query(SearchParamDefaults.filters),
-    faceted: List[str] = fastapi_query(SearchParamDefaults.faceted),
+    filters: list[FilterRequest] = fastapi_query(SearchParamDefaults.filters),
+    faceted: list[FacetRequest] = fastapi_query(SearchParamDefaults.faceted),
     sort_field: SortField = fastapi_query(SearchParamDefaults.sort_field),
     sort_limit: Optional[int] = fastapi_query(SearchParamDefaults.sort_limit),
     sort_order: SortOrder = fastapi_query(SearchParamDefaults.sort_order),

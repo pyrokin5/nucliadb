@@ -33,6 +33,8 @@ from nucliadb.search.search.query import suggest_query_to_pb
 from nucliadb_models.common import FieldTypeName
 from nucliadb_models.resource import NucliaDBRoles
 from nucliadb_models.search import (
+    FacetRequest,
+    FilterRequest,
     KnowledgeboxSuggestResults,
     NucliaDBClientType,
     ResourceProperties,
@@ -58,9 +60,9 @@ async def suggest_knowledgebox(
     response: Response,
     kbid: str,
     query: str = fastapi_query(SearchParamDefaults.suggest_query),
-    fields: List[str] = fastapi_query(SearchParamDefaults.fields),
-    filters: List[str] = fastapi_query(SearchParamDefaults.filters),
-    faceted: List[str] = fastapi_query(SearchParamDefaults.faceted),
+    fields: list[str] = fastapi_query(SearchParamDefaults.fields),
+    filters: list[FilterRequest] = fastapi_query(SearchParamDefaults.filters),
+    faceted: list[FacetRequest] = fastapi_query(SearchParamDefaults.faceted),
     range_creation_start: Optional[datetime] = fastapi_query(
         SearchParamDefaults.range_creation_start
     ),

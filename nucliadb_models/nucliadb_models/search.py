@@ -92,10 +92,6 @@ class Sort(int, Enum):
     ASC = 1
 
 
-class Facet(BaseModel):
-    facetresults: Dict[str, int]
-
-
 FacetsResult = Dict[str, Any]
 
 
@@ -536,14 +532,56 @@ class SearchParamDefaults:
     )
 
 
+class FacetType(str, Enum):
+    TAGS = "tags"
+    LABELS = "labels"
+    ENTITIES = "entities"
+    MIME_TYPE = "mime_type"
+    PROCESSGING_STATUS = "processing_status"
+    PRIMARY_LANGUAGE = "primary_language"
+    DETECTED_LANGUAGES = "detected_languages"
+    CONTRIBUTORS = "contributors"
+
+
+FACET_TYPE_TO_FILTER = {
+    FacetType.TAGS: "/t",
+    FacetType.LABELS: "/l",
+    FacetType.ENTITIES: "/e",
+    FacetType.MIME_TYPE: "/n/i",
+    FacetType.PROCESSGING_STATUS: "/n/s",
+    FacetType.PRIMARY_LANGUAGE: "/s/p",
+    FacetType.DETECTED_LANGUAGES: "/s/s",
+    FacetType.CONTRIBUTORS: "/u/o",
+}
+
+
+class FacetFilterBase(BaseModel):
+    type: FacetType
+    value: Optional[str] = None
+
+    def tag(self) -> str:
+        tag = f"{FACET_TYPE_TO_FILTER[self.type]}"
+        if self.value:
+            tag += f"/{self.value}"
+        return tag
+
+
+class FacetRequest(FacetFilterBase):
+    depth: int = 1
+
+
+class FilterRequest(FacetFilterBase):
+    ...
+
+
 class BaseSearchRequest(BaseModel):
     query: str = SearchParamDefaults.query.to_pydantic_field()
     advanced_query: Optional[
         str
     ] = SearchParamDefaults.advanced_query.to_pydantic_field()
-    fields: List[str] = SearchParamDefaults.fields.to_pydantic_field()
-    filters: List[str] = SearchParamDefaults.filters.to_pydantic_field()
-    faceted: List[str] = SearchParamDefaults.faceted.to_pydantic_field()
+    fields: list[str] = SearchParamDefaults.fields.to_pydantic_field()
+    filters: list[FilterRequest] = SearchParamDefaults.filters.to_pydantic_field()
+    faceted: list[FacetRequest] = SearchParamDefaults.faceted.to_pydantic_field()
     page_number: int = SearchParamDefaults.page_number.to_pydantic_field()
     page_size: int = SearchParamDefaults.page_size.to_pydantic_field()
     min_score: float = SearchParamDefaults.min_score.to_pydantic_field()
@@ -627,10 +665,10 @@ class AskDocumentModel(BaseModel):
 
 class ChatRequest(BaseModel):
     query: str = SearchParamDefaults.chat_query.to_pydantic_field()
-    fields: List[str] = SearchParamDefaults.fields.to_pydantic_field()
-    filters: List[str] = SearchParamDefaults.filters.to_pydantic_field()
+    fields: list[str] = SearchParamDefaults.fields.to_pydantic_field()
+    filters: list[FilterRequest] = SearchParamDefaults.filters.to_pydantic_field()
     min_score: float = SearchParamDefaults.min_score.to_pydantic_field()
-    features: List[ChatOptions] = SearchParamDefaults.chat_features.to_pydantic_field()
+    features: list[ChatOptions] = SearchParamDefaults.chat_features.to_pydantic_field()
     range_creation_start: Optional[
         datetime
     ] = SearchParamDefaults.range_creation_start.to_pydantic_field()
@@ -643,23 +681,23 @@ class ChatRequest(BaseModel):
     range_modification_end: Optional[
         datetime
     ] = SearchParamDefaults.range_modification_end.to_pydantic_field()
-    show: List[ResourceProperties] = SearchParamDefaults.show.to_pydantic_field()
-    field_type_filter: List[
+    show: list[ResourceProperties] = SearchParamDefaults.show.to_pydantic_field()
+    field_type_filter: list[
         FieldTypeName
     ] = SearchParamDefaults.field_type_filter.to_pydantic_field()
-    extracted: List[
+    extracted: list[
         ExtractedDataTypeName
     ] = SearchParamDefaults.extracted.to_pydantic_field()
-    shards: List[str] = SearchParamDefaults.shards.to_pydantic_field()
+    shards: list[str] = SearchParamDefaults.shards.to_pydantic_field()
     context: Optional[
-        List[Message]
+        list[Message]
     ] = SearchParamDefaults.chat_context.to_pydantic_field()
     autofilter: bool = SearchParamDefaults.autofilter.to_pydantic_field()
     highlight: bool = SearchParamDefaults.highlight.to_pydantic_field()
 
 
 class FindRequest(BaseSearchRequest):
-    features: List[
+    features: list[
         SearchOptions
     ] = SearchParamDefaults.search_features.to_pydantic_field(
         default=[
@@ -683,8 +721,8 @@ class SCORE_TYPE(str, Enum):
 
 class FindTextPosition(BaseModel):
     page_number: Optional[int]
-    start_seconds: Optional[List[int]] = None
-    end_seconds: Optional[List[int]] = None
+    start_seconds: Optional[list[int]] = None
+    end_seconds: Optional[list[int]] = None
     index: int
     start: int
     end: int

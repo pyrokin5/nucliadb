@@ -36,6 +36,8 @@ from nucliadb.search.search.synonyms import apply_synonyms_to_request
 from nucliadb.search.utilities import get_predict
 from nucliadb_models.metadata import ResourceProcessingStatus
 from nucliadb_models.search import (
+    FacetRequest,
+    FilterRequest,
     SearchOptions,
     SortFieldMap,
     SortOptions,
@@ -49,10 +51,10 @@ REMOVABLE_CHARS = re.compile(r"\¿|\?|\!|\¡|\,|\;|\.|\:")
 
 async def global_query_to_pb(
     kbid: str,
-    features: List[SearchOptions],
+    features: list[SearchOptions],
     query: str,
-    filters: List[str],
-    faceted: List[str],
+    filters: list[FilterRequest],
+    faceted: list[FacetRequest],
     page_number: int,
     page_size: int,
     min_score: float,
@@ -62,7 +64,7 @@ async def global_query_to_pb(
     range_creation_end: Optional[datetime] = None,
     range_modification_start: Optional[datetime] = None,
     range_modification_end: Optional[datetime] = None,
-    fields: Optional[List[str]] = None,
+    fields: Optional[list[str]] = None,
     reload: bool = False,
     user_vector: Optional[List[float]] = None,
     vectorset: Optional[str] = None,
@@ -70,8 +72,8 @@ async def global_query_to_pb(
     with_status: Optional[ResourceProcessingStatus] = None,
     with_synonyms: bool = False,
     autofilter: bool = False,
-    key_filters: Optional[List[str]] = None,
-) -> Tuple[SearchRequest, bool, List[str]]:
+    key_filters: Optional[list[str]] = None,
+) -> Tuple[SearchRequest, bool, list[str]]:
     """
     Converts the pydantic query to a protobuf query
 
@@ -91,8 +93,8 @@ async def global_query_to_pb(
         request.advanced_query = advanced_query
     request.reload = reload
     request.with_duplicates = with_duplicates
-    request.filter.tags.extend(filters)
-    request.faceted.tags.extend(faceted)
+    request.filter.tags.extend([f.tag() for f in filters])
+    request.faceted.tags.extend([f.tag() for f in faceted])
     request.fields.extend(fields)
     request.key_filters.extend(key_filters or [])
 
@@ -212,11 +214,11 @@ def parse_entities_to_filters(
 
 
 async def suggest_query_to_pb(
-    features: List[SuggestOptions],
+    features: list[SuggestOptions],
     query: str,
-    fields: List[str],
-    filters: List[str],
-    faceted: List[str],
+    fields: list[str],
+    filters: list[FilterRequest],
+    faceted: list[FacetRequest],
     range_creation_start: Optional[datetime] = None,
     range_creation_end: Optional[datetime] = None,
     range_modification_start: Optional[datetime] = None,
@@ -225,7 +227,7 @@ async def suggest_query_to_pb(
     request = SuggestRequest()
     if SuggestOptions.PARAGRAPH in features:
         request.body = query
-        request.filter.tags.extend(filters)
+        request.filter.tags.extend([f.tag() for f in filters])
         request.fields.extend(fields)
 
     if range_creation_start is not None:
@@ -244,9 +246,9 @@ async def paragraph_query_to_pb(
     features: List[SearchOptions],
     rid: str,
     query: str,
-    fields: List[str],
-    filters: List[str],
-    faceted: List[str],
+    fields: list[str],
+    filters: list[FilterRequest],
+    faceted: list[FacetRequest],
     page_number: int,
     page_size: int,
     range_creation_start: Optional[datetime] = None,
@@ -281,8 +283,8 @@ async def paragraph_query_to_pb(
     if SearchOptions.PARAGRAPH in features:
         request.uuid = rid
         request.body = query
-        request.filter.tags.extend(filters)
-        request.faceted.tags.extend(faceted)
+        request.filter.tags.extend([f.tag() for f in filters])
+        request.faceted.tags.extend([f.tag() for f in faceted])
         if sort:
             request.order.field = sort
             request.order.type = sort_ord  # type: ignore

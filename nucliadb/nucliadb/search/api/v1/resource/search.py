@@ -32,6 +32,8 @@ from nucliadb.search.search.query import paragraph_query_to_pb
 from nucliadb_models.common import FieldTypeName
 from nucliadb_models.resource import ExtractedDataTypeName, NucliaDBRoles
 from nucliadb_models.search import (
+    FacetRequest,
+    FilterRequest,
     NucliaDBClientType,
     ResourceProperties,
     ResourceSearchResults,
@@ -59,9 +61,9 @@ async def resource_search(
     kbid: str,
     query: str,
     rid: str,
-    fields: List[str] = fastapi_query(SearchParamDefaults.fields),
-    filters: List[str] = fastapi_query(SearchParamDefaults.filters),
-    faceted: List[str] = fastapi_query(SearchParamDefaults.faceted),
+    fields: list[str] = fastapi_query(SearchParamDefaults.fields),
+    filters: list[FilterRequest] = fastapi_query(SearchParamDefaults.filters),
+    faceted: list[FacetRequest] = fastapi_query(SearchParamDefaults.faceted),
     sort: Optional[SortField] = fastapi_query(
         SearchParamDefaults.sort_field, alias="sort_field"
     ),

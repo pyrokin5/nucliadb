@@ -35,6 +35,8 @@ from nucliadb.search.search.query import global_query_to_pb, pre_process_query
 from nucliadb_models.common import FieldTypeName
 from nucliadb_models.resource import ExtractedDataTypeName, NucliaDBRoles
 from nucliadb_models.search import (
+    FacetRequest,
+    FilterRequest,
     FindRequest,
     KnowledgeboxFindResults,
     NucliaDBClientType,
@@ -75,9 +77,9 @@ async def find_knowledgebox(
     kbid: str,
     query: str = fastapi_query(SearchParamDefaults.query),
     advanced_query: Optional[str] = fastapi_query(SearchParamDefaults.advanced_query),
-    fields: List[str] = fastapi_query(SearchParamDefaults.fields),
-    filters: List[str] = fastapi_query(SearchParamDefaults.filters),
-    faceted: List[str] = fastapi_query(SearchParamDefaults.faceted),
+    fields: list[str] = fastapi_query(SearchParamDefaults.fields),
+    filters: list[FilterRequest] = fastapi_query(SearchParamDefaults.filters),
+    faceted: list[FacetRequest] = fastapi_query(SearchParamDefaults.faceted),
     page_number: int = fastapi_query(SearchParamDefaults.page_number),
     page_size: int = fastapi_query(SearchParamDefaults.page_size),
     min_score: float = fastapi_query(SearchParamDefaults.min_score),
