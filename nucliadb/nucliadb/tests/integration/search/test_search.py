@@ -1419,3 +1419,24 @@ async def test_facets_validation(
         f"/kb/{kbid}/{endpoint}", params={"faceted": valid_facets}
     )
     assert resp.status_code == 200
+
+
+async def test_titles_are_searchable(
+    nucliadb_reader: AsyncClient,
+    nucliadb_writer: AsyncClient,
+    nucliadb_grpc: WriterStub,
+    knowledgebox,
+):
+    kbid = knowledgebox
+    title = "My_text_file.txt"
+    resp = await nucliadb_writer.post(
+        f"/kb/{kbid}/resources",
+        json={"title": title, "texts": {"text": {"body": "dummy"}}},
+        headers={"X-Synchronous": "true"},
+    )
+    assert resp.status_code == 201
+
+    resp = await nucliadb_reader.post(f"/kb/{kbid}/search", json={"query": "dummy"})
+    assert resp.status_code == 200
+    breakpoint()
+    pass
