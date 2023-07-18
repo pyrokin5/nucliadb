@@ -48,6 +48,7 @@ async def test_entities_service(
 ) -> None:
     async with nucliadb_api(roles=[NucliaDBRoles.WRITER]) as client:
         entitygroup = {
+            "group": "group1",
             "title": "Kitchen",
             "custom": True,
             "entities": {
@@ -60,7 +61,7 @@ async def test_entities_service(
             },
         }
         resp = await client.post(
-            f"/{KB_PREFIX}/{knowledgebox_one}/entitiesgroup/group1", json=entitygroup
+            f"/{KB_PREFIX}/{knowledgebox_one}/entitiesgroups", json=entitygroup
         )
         assert resp.status_code == 200
 
