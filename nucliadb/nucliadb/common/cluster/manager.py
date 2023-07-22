@@ -42,7 +42,9 @@ from .exceptions import (
     ShardNotFound,
     ShardsNotFound,
 )
+from .index_node import IndexNode
 from .settings import settings
+from .standalone.index_node import ProxyStandaloneIndexNode
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +59,15 @@ def get_index_node(node_id: str) -> Optional[AbstractIndexNode]:
     return INDEX_NODES.get(node_id)
 
 
-def add_index_node(node: AbstractIndexNode) -> None:
-    INDEX_NODES[node.id] = node
+def add_index_node(
+    *, id: str, address: str, shard_count: int, dummy: bool = False
+) -> None:
+    node_klass = IndexNode
+    if settings.standalone_mode:
+        node_klass = ProxyStandaloneIndexNode
+    INDEX_NODES[id] = node_klass(
+        id=id, address=address, shard_count=shard_count, dummy=dummy
+    )
 
 
 def remove_index_node(node_id: str) -> None:
@@ -331,21 +340,6 @@ class StandaloneKBShardManager(KBShardManager):
                     f"Node {shardreplica.node} is not found or not available"
                 )
             await index_node.writer.SetResource(resource)  # type: ignore
-
-
-def setup_standalone_cluster():
-    from .standalone.index_node import StandaloneIndexNode
-
-    inode = StandaloneIndexNode(
-        # "LOCAL NODE" is the name of the node for all shards
-        # that have been created in standalone mode so far.
-        # When we switch to supporting clustering in standalone,
-        # we will need to generate a unique name for each node and update this
-        id="LOCAL NODE",
-        address="localhost",
-        shard_count=0,
-    )
-    INDEX_NODES[inode.id] = inode
 
 
 def choose_node(

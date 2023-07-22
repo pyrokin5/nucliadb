@@ -17,17 +17,28 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+import functools
+import inspect
 import logging
+from socket import gethostname
 
-from fastapi import Request
+import pydantic
+from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from fastapi_versioning import version
 
+from nucliadb.common.cluster import manager
+from nucliadb.common.cluster.standalone import grpc_node_binding
+from nucliadb.common.cluster.standalone.index_node import StandaloneIndexNode
+from nucliadb.common.cluster.utils import get_shard_manager as get_shard_manager
 from nucliadb.common.http_clients.processing import ProcessingHTTPClient
+from nucliadb.standalone.utils import get_standalone_node_id
 from nucliadb_models.resource import NucliaDBRoles
 from nucliadb_utils.authentication import requires
 from nucliadb_utils.settings import nuclia_settings
+
+from .settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -60,4 +71,77 @@ async def api_config_check(request: Request):
                 "roles": request.auth.scopes,
             },
         },
+    )
+
+
+class ClusterNode(pydantic.BaseModel):
+    id: str
+    address: str
+    shard_count: int
+
+
+class ClusterInfo(pydantic.BaseModel):
+    nodes: list[ClusterNode]
+
+
+_SELF_INDEX_NODE = None
+
+
+def get_self(settings: Settings) -> StandaloneIndexNode:
+    global _SELF_INDEX_NODE
+    if _SELF_INDEX_NODE is None:
+        _SELF_INDEX_NODE = StandaloneIndexNode(
+            id=get_standalone_node_id(),
+            address=f"{gethostname()}:{settings.http_port}",
+            shard_count=0,
+        )
+    return _SELF_INDEX_NODE
+
+
+@standalone_api_router.get("/cluster/nodes")
+@version(1)
+@requires(NucliaDBRoles.MANAGER)
+async def cluster_info(request: Request) -> ClusterInfo:
+    node_info = []
+    for node in manager.get_index_nodes():
+        node_info.append(
+            ClusterNode(id=node.id, address=node.address, shard_count=node.shard_count)
+        )
+
+    return ClusterInfo(nodes=node_info)
+
+
+@standalone_api_router.get("/cluster/self/info")
+@version(1)
+@requires(NucliaDBRoles.MANAGER)
+async def current_node_info(request: Request):
+    index_node = get_self(request.app.settings)
+    return {
+        "id": index_node.id,
+        "address": index_node.address,
+        "shard_count": index_node.shard_count,
+    }
+
+
+@standalone_api_router.post("/cluster/self/rpc/{service}/{action}")
+@version(1)
+@requires(NucliaDBRoles.MANAGER)
+async def node_action(request: Request, service: str, action: str) -> bytes:
+    index_node = get_self(request.app.settings)
+    payload = await request.body()
+    if service == "reader":
+        method = getattr(index_node.reader, action)
+    elif service == "writer":
+        method = getattr(index_node.writer, action)
+    else:
+        method = getattr(index_node.sidecar, action)
+
+    sig = inspect.signature(method.__func__)
+    request_type = getattr(grpc_node_binding, sig.parameters["request"].annotation)
+
+    request = request_type()
+    request.ParseFromString(payload)
+    response = await method(request)
+    return Response(
+        content=response.SerializeToString(), media_type="application/octet-stream"
     )

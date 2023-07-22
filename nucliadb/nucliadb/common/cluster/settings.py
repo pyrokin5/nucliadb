@@ -27,6 +27,7 @@ class ClusterDiscoveryMode(str, enum.Enum):
     CHITCHAT = "chitchat"
     MANUAL = "manual"
     KUBERNETES = "kubernetes"
+    STANDALONE = "standalone"
 
 
 class Settings(BaseSettings):
