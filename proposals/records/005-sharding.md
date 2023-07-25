@@ -35,36 +35,62 @@ Overview of current problems:
 
 ## Proposed Solution
 
-- Unified index
-- Index coordinator
-- Shard data
-- Shard coordination
+The proposed solution is oriented around providing a unified index to simplify
+how we store shard data on the IndexNode.
+
+With a unified index implementation, it is feasible to provide more
+capabilities around sharding(dynamic replicas, rebalancing).
 
 
-### Unified index
+### Unified Index
 
+By "unified index," we are referring to an index that stores all data
+in a single disk format that hnsw, bm25, etc can then utilize.
 
+An important aspect of this unified index design is that it also provides
+segmented storage. By segmented storage, we mean that each write should
+produce a new segment. That new segment will work along with other existing
+segments to provide the shard's full dataset.
+
+[more details on the implementation provided elsewhere]
 
 #### Breaking changes
 
-- Split from tantivy
-- No full entity graph implementation
+- Split from tantivy: Tantivy is not compatible with this approach.
+- No full entity graph implementation built in
 - No advanced query support
+
 
 ### Replication
 
-- Commit log
-- Raft to coordinate replication status between nodes
-- 
+Each shard will have a commit log to track changes through time and
+communicate changes to read replicas.
 
-### Shard Coordinator
+- Commit log is append only file for each shard which tracks all segments
+  and their files. This is then used for replication to read replicas.
+- Writers are responsible for replicating data to readers consistently
+    - 2 phase "commit". First write files everywhere. Second, "turn on" new files.
+    - Having writers responsible for replication allows us to avoid needing
+      to implement something like raft to coordinate read replica state
+    - Writers then know when/how to 
+- Readers are responsible for merging segments
 
+
+### Index Coordinator
+
+The Index Coordinator is the component responsible for managing the
+IndexNode cluster.
+
+The Index coordinator is the only component that should "know" about
+what shards a Knowledge Box has and how to correctly query or write to them.
 
 Responsibilities:
+- Configuring writers and replication
+- Know writer and reader health
 - Balancing shards across cluster
-    - Place new shards appropriate
+    - Place new shards appropriately
     - Move shards when things are unbalanced
-    - Increase replicas for hot shards
+    - Increase replicas for hot shards, reduce for inactive
 - Record keeping
     - Shard stats
     - Usage stats
@@ -74,15 +100,37 @@ APIs:
 - Create Shard
 - Delete Shard
 - Shard Operation
-    - Search, etc
+    - Search
+    - etc
 
+
+### Index Node Writer
+
+- track what shards they are responsible for and their replica settings
+
+Write path diagram:
+![Write Path Diagram](./images/005/write-path-ndb-coor.drawio.png)
+
+### Index Node Reader
+
+
+Read path diagram:
+![Read Path Diagram](./images/005/write-path-ndb-coor.drawio.png)
+
+
+## Alternatives
+
+- Use raft to coordinate reader replication state and have readers
+  responsible for their own replication. This proposal focuses on having the
+  writer responsible for replicating data.
 
 
 ## Rollout plan
 
 
-1. Unified index
+1. Unified index + commit log implementation
 2. 
+3. Index coordinator
 
 
 ## Success Criteria
